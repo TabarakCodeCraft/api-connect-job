@@ -3,7 +3,7 @@ const profileController = require('../../controller/employee/profile.controller'
 const { authenticateToken, authorizeEmployee } = require('../../middleware/auth');
 const { uploadCVMiddleware } = require('../../utils/fileUpload');
 const { validateProfileUpdate, validateExperience, validateEducation } = require('../../middleware/validation');
-const { getMatchedJobs } = require('../../controller/employee/profile.controller');
+
 const auth = require('../../middleware/auth');
 
 const router = express.Router();
@@ -27,6 +27,6 @@ router.post('/experience', validateExperience, profileController.addExperience);
 router.put('/experience/:experienceId', validateExperience, profileController.updateExperience);
 router.delete('/experience/:experienceId', profileController.deleteExperience);
 
-router.get('/matched-jobs', getMatchedJobs);
+
 
 module.exports = router;

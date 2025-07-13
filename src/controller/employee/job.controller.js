@@ -37,26 +37,104 @@ function calculateMatch(employee, job) {
 
 const getMatchedJobs = async (req, res) => {
   try {
+    console.log('User data from token:', req.user);
+    
     const employeeId = req.user.employeeId;
-    const employee = await prisma.employee.findUnique({ where: { id: employeeId } });
-    if (!employee) return res.status(404).json({ message: 'Employee not found' });
+    if (!employeeId) {
+      // إذا لم يكن هناك employeeId، نبحث عن الموظف باستخدام userId
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.userId },
+        include: {
+          employee: true
+        }
+      });
+      
+      if (!user || !user.employee) {
+        return res.status(404).json({ 
+          success: false,
+          message: 'Employee profile not found. Please complete your profile first.' 
+        });
+      }
+      
+      // تحديث employeeId
+      req.user.employeeId = user.employee.id;
+      console.log('Found employee ID from user lookup:', user.employee.id);
+    }
 
+    const employee = await prisma.employee.findUnique({ 
+      where: { id: req.user.employeeId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            role: true
+          }
+        }
+      }
+    });
+    
+    if (!employee) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Employee profile not found. Please complete your profile first.' 
+      });
+    }
+
+    console.log('Found employee:', employee.fullName);
+
+    // جلب جميع الوظائف النشطة بدلاً من الوظائف المطابقة فقط
     const jobs = await prisma.job.findMany({ 
       where: { isActive: true },
-      include: { company: { select: { companyName: true, email: true, phone: true } } },
+      include: { 
+        company: { 
+          select: { 
+            companyName: true, 
+            email: true, 
+            phone: true 
+          } 
+        } 
+      },
+      orderBy: { createdAt: 'desc' } // ترتيب حسب الأحدث
     });
-    const matchedJobs = jobs
-      .map(job => {
-        const matchRate = calculateMatch(employee, job);
-        return { ...job, matchRate };
-      })
-      .filter(job => job.matchRate >= 50)
-      .sort((a, b) => b.matchRate - a.matchRate);
+    
+    console.log(`Found ${jobs.length} active jobs`);
+    
+    // حساب نسبة التطابق لكل وظيفة ولكن عرض جميع الوظائف
+    const allJobs = jobs.map(job => {
+      const matchRate = calculateMatch(employee, job);
+      return { ...job, matchRate };
+    });
 
-    res.json(matchedJobs);
+    // ترتيب الوظائف حسب نسبة التطابق (الأعلى أولاً) ثم حسب التاريخ
+    const sortedJobs = allJobs.sort((a, b) => {
+      if (b.matchRate !== a.matchRate) {
+        return b.matchRate - a.matchRate;
+      }
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    console.log(`Returning ${sortedJobs.length} jobs with match rates`);
+
+    res.json({
+      success: true,
+      data: sortedJobs,
+      totalJobs: sortedJobs.length,
+      employeeProfile: {
+        fullName: employee.fullName,
+        jobTitle: employee.jobTitle,
+        governorate: employee.governorate,
+        specialization: employee.specialization
+      }
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error in getMatchedJobs:', err);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error occurred while fetching jobs',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 };
 

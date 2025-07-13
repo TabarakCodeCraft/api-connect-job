@@ -44,7 +44,9 @@ const getProfile = async (req, res, next) => {
         experiences: employee.experiences || [],
         governorate: employee.governorate,
         jobTitle: employee.jobTitle,
-        location: employee.location
+        location: employee.location,
+        lineOfWork: employee.lineOfWork || "",
+        carOwnership: employee.carOwnership || ""
       }
     });
   } catch (error) {
@@ -65,6 +67,8 @@ const updateProfile = async (req, res, next) => {
       bio,
       governorate,
       jobTitle,
+      lineOfWork,
+      carOwnership,
       educations,
       experiences,
       location
@@ -99,11 +103,13 @@ const updateProfile = async (req, res, next) => {
     let processedEducations = employee.educations;
     if (educations && Array.isArray(educations)) {
       processedEducations = educations.map(edu => ({
-        id: edu.id || Date.now() + Math.random(), // Generate ID if not provided
+        id: edu.id || Date.now(),
         institution: edu.institution,
         degree: edu.degree,
         duration: edu.duration,
         description: edu.description,
+        startDate: edu.startDate || null,
+        endDate: edu.endDate || null,
         createdAt: edu.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }));
@@ -113,12 +119,14 @@ const updateProfile = async (req, res, next) => {
     let processedExperiences = employee.experiences;
     if (experiences && Array.isArray(experiences)) {
       processedExperiences = experiences.map(exp => ({
-        id: exp.id || Date.now() + Math.random(), // Generate ID if not provided
+        id: exp.id || Date.now(),
         company: exp.company,
         position: exp.position,
         lineOfWork: exp.lineOfWork,
         duration: exp.duration,
         description: exp.description,
+        startDate: exp.startDate || null,
+        endDate: exp.endDate || null,
         createdAt: exp.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }));
@@ -135,6 +143,8 @@ const updateProfile = async (req, res, next) => {
         bio: bio || employee.bio,
         governorate: governorate || employee.governorate,
         jobTitle: jobTitle || employee.jobTitle,
+        lineOfWork: lineOfWork || employee.lineOfWork,
+        carOwnership: carOwnership || employee.carOwnership,
         educations: processedEducations,
         experiences: processedExperiences,
         updatedAt: new Date(),
@@ -285,7 +295,7 @@ const addEducation = async (req, res, next) => {
 const updateEducation = async (req, res, next) => {
   try {
     const userId = req.user.userId;
-    const educationId = parseInt(req.params.educationId);
+    const educationId = Number(req.params.educationId);
     const { institution, degree, duration, description, startDate, endDate } = req.body;
 
     const employee = await prisma.employee.findFirst({
@@ -437,7 +447,7 @@ const addExperience = async (req, res, next) => {
 const updateExperience = async (req, res, next) => {
   try {
     const userId = req.user.userId;
-    const experienceId = parseInt(req.params.experienceId);
+    const experienceId = Number(req.params.experienceId);
     const { company, position, lineOfWork, duration, description, startDate, endDate } = req.body;
 
     const employee = await prisma.employee.findFirst({
@@ -621,9 +631,9 @@ const getEmployeeFilterOptions = async (req, res, next) => {
     const carOwnershipOptions = Array.from(new Set([...carOwnerships.map(c => c.carOwnership).filter(Boolean), 'YES', 'NO']));
 
     // استخدم جميع القيم من الـ enum وليس فقط من قاعدة البيانات
-    const allGovernorates = Object.values(Governorate);
-    const allJobTitles = Object.values(JobTitle);
-    const allLineOfWork = Object.values(LineOfWork);
+    const allGovernorates = typeof Governorate === 'object' && Governorate !== null ? Object.values(Governorate) : [];
+    const allJobTitles = typeof JobTitle === 'object' && JobTitle !== null ? Object.values(JobTitle) : [];
+    const allLineOfWork = typeof LineOfWork === 'object' && LineOfWork !== null ? Object.values(LineOfWork) : [];
 
     res.json({
       locations: locations.map(l => l.location).filter(Boolean),
@@ -658,34 +668,8 @@ const getEmployeeById = async (req, res, next) => {
   }
 };
 
-// جلب الوظائف المتشابهة مع الموظف
-const getMatchedJobs = async (req, res) => {
-  try {
-    const employeeId = req.user.employeeId; // يفترض أن الموظف مصادق عليه
-    if (!employeeId) {
-      return res.status(403).json({ error: 'غير مصرح' });
-    }
-    const matches = await prisma.jobMatch.findMany({
-      where: { employeeId },
-      include: {
-        job: {
-          include: { company: true }
-        }
-      },
-      orderBy: { matchRate: 'desc' }
-    });
-    const jobs = matches.map(match => ({
-      job: match.job,
-      matchRate: match.matchRate
-    }));
-    res.json({ jobs });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'حدث خطأ أثناء جلب الوظائف المتشابهة' });
-  }
-};
 
-// إحصائيات الموظفين حسب المحافظة والتخصص والمسمى الوظيفي
+
 const getEmployeeStats = async (req, res, next) => {
   try {
     // حسب المحافظة
@@ -732,6 +716,6 @@ module.exports = {
   getAllEmployeesPublic,
   getEmployeeFilterOptions,
   getEmployeeById,
-  getMatchedJobs,
+
   getEmployeeStats,
 };

@@ -6,7 +6,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
- 
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -22,20 +22,21 @@ model User {
 }
 
 model Employee {
-  id          Int       @id @default(autoincrement())
-  userId      Int       @unique
-  phone       String?
-  gender      String?
-  birthDate   DateTime?
-  fullName    String?
-  governorate Governorate?
-  jobTitle    JobTitle?
-  bio         String?
-  cvUrl       String?
-  educations  Json?     @db.JsonB
-  experiences Json?     @db.JsonB
-  location    String?
-  carOwnership CarOwnership?
+  id             Int           @id @default(autoincrement())
+  userId         Int           @unique
+  phone          String?
+  gender         String?
+  birthDate      DateTime?
+  fullName       String?
+  lineOfWork     LineOfWork?
+  governorate    Governorate?
+  jobTitle       JobTitle?
+  bio            String?
+  cvUrl          String?
+  educations     Json?         @db.JsonB
+  experiences    Json?         @db.JsonB
+  location       String?
+  carOwnership   CarOwnership?
   specialization String?
 
   createdAt DateTime @default(now())
@@ -46,18 +47,18 @@ model Employee {
 }
 
 model Company {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  companyName   String
-  sector        String
-  address       String
-  phone         String
-  fullname      String
-  governorate   String
-  jobTitle      JobTitle
-  secretCode    String?  @unique
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  companyName String
+  sector      String
+  address     String
+  phone       String
+  fullname    String
+  governorate String
+  jobTitle    JobTitle
+  secretCode  String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   jobs         Job[]
   secretCodes  SecretCode[]
@@ -65,22 +66,22 @@ model Company {
 }
 
 model Job {
-  id              Int       @id @default(autoincrement())
-  companyId       Int
-  jobTitle        String
-  description     String
-  requirements    String
-  governorate     String
-  specialization  String
-  salary          String
-   contactEmail String
-      contactPhone String
-  lineOfWork      String?
-  gender          String?
-  carOwnership    String?
-  isActive        Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id             Int      @id @default(autoincrement())
+  companyId      Int
+  jobTitle       String
+  description    String
+  requirements   String
+  governorate    String
+  specialization String
+  salary         String
+  contactEmail   String
+  contactPhone   String
+  lineOfWork     String?
+  gender         String?
+  carOwnership   String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   company    Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   jobMatches JobMatch[]
@@ -125,18 +126,18 @@ model Notification {
 }
 
 model CompanyRequest {
-  id            Int      @id @default(autoincrement())
-  email         String
-  companyName   String
-  sector        String
-  address       String
-  phone         String
-  fullname      String
-  governorate   String
-  jobTitle      JobTitle
-  status        String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  email       String
+  companyName String
+  sector      String
+  address     String
+  phone       String
+  fullname    String
+  governorate String
+  jobTitle    JobTitle
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum Role {

@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "seed:jobs": "node prisma/jobSeed.js",
+    "seed:employee": "node prisma/employeeSeed.js"
   },
   "keywords": [],
   "author": "",

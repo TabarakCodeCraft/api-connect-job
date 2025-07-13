@@ -19,7 +19,7 @@ exports.createJob = async (req, res) => {
       contactEmail,
       contactPhone
     } = req.body;
-    if (!jobTitle || !description || !requirements || !governorate || !salary || !specialization || !contactEmail || !contactPhone) {
+    if (!jobTitle || !description || !requirements || !governorate || !salary || !specialization) {
       return res.status(400).json({ error: 'جميع الحقول الأساسية مطلوبة' });
     }
 
