@@ -17,6 +17,7 @@ const adminSecretCodeRoutes = require('./routes/admin/secretCode.routes');
 const adminNotificationRoutes = require('./routes/admin/notification.routes');
 const companyJobRoutes = require('./routes/company/job.routes');
 const employeeJobRoutes = require('./routes/employee/job.routes');
+const adminJobRoutes = require('./routes/admin/job.routes');
 
 const app = express();
 require('dotenv').config();
@@ -51,6 +52,7 @@ app.use('/api/admin/companies', adminCompanyRoutes);
 app.use('/api/admin/employees', adminEmployeeRoutes);
 app.use('/api/admin/secret-codes', adminSecretCodeRoutes);
 app.use('/api/admin/notifications', adminNotificationRoutes);
+app.use('/api/admin/jobs', adminJobRoutes);
 
 app.use(errorHandler);
 
