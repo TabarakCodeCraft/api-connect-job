@@ -1,7 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Get all notifications for a specific employee
 const getEmployeeNotifications = async (req, res, next) => {
   try {
     const userId = req.user?.userId;
@@ -14,13 +13,11 @@ const getEmployeeNotifications = async (req, res, next) => {
       });
     }
 
-    // جلب الإشعارات العادية
     const notifications = await prisma.notification.findMany({
       where: { userId: userId },
       orderBy: { createdAt: 'desc' },
     });
 
-    // جلب الوظائف المتناسبة من JobMatch
     const jobMatches = await prisma.jobMatch.findMany({
       where: {
         employeeId: employeeId,
@@ -32,7 +29,6 @@ const getEmployeeNotifications = async (req, res, next) => {
       orderBy: { createdAt: 'desc' },
     });
 
-    // إضافة إشعار إذا كان نفس المحافظة أو نفس المسمى الوظيفي
     const employee = await prisma.employee.findUnique({ where: { id: employeeId } });
     const orConditions = [];
     if (employee.governorate) {
@@ -52,7 +48,6 @@ const getEmployeeNotifications = async (req, res, next) => {
       });
     }
 
-    // بناء إشعارات ديناميكية للوظائف المتناسبة
     const jobNotifications = jobMatches.map(match => ({
       id: `jobmatch-${match.id}`,
       title: 'وظيفة متناسبة مع ملفك',
@@ -63,7 +58,6 @@ const getEmployeeNotifications = async (req, res, next) => {
       job: match.job,
     }));
 
-    // إشعارات المحافظة أو المسمى الوظيفي (بدون تكرار)
     const extraJobNotifications = extraJobs
       .filter(job => !jobMatches.some(match => match.jobId === job.id))
       .map(job => ({
@@ -76,7 +70,6 @@ const getEmployeeNotifications = async (req, res, next) => {
         job,
       }));
 
-    // دمج كل الإشعارات
     const allNotifications = [
       ...notifications,
       ...jobNotifications,
@@ -92,7 +85,6 @@ const getEmployeeNotifications = async (req, res, next) => {
   }
 };
 
-// Mark notification as read
 const markNotificationAsRead = async (req, res, next) => {
   const { id } = req.params;
   const userId = req.user?.userId;
@@ -122,7 +114,6 @@ const markNotificationAsRead = async (req, res, next) => {
   }
 };
 
-// Mark all notifications as read
 const markAllNotificationsAsRead = async (req, res, next) => {
   const userId = req.user?.userId;
 
@@ -151,7 +142,6 @@ const markAllNotificationsAsRead = async (req, res, next) => {
   }
 };
 
-// Delete notification
 const deleteNotification = async (req, res, next) => {
   const { id } = req.params;
   const userId = req.user?.userId;
