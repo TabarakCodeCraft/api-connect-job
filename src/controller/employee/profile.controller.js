@@ -573,7 +573,6 @@ const getAllEmployeesPublic = async (req, res, next) => {
       ];
     }
 
-    // Query employees
     let [employees, totalCount] = await Promise.all([
       prisma.employee.findMany({
         where,
@@ -587,7 +586,6 @@ const getAllEmployeesPublic = async (req, res, next) => {
       prisma.employee.count({ where }),
     ]);
 
-    // If lineOfWork filter is provided, filter in JS
     if (lineOfWork && lineOfWork !== 'undefined') {
       employees = employees.filter(emp =>
         Array.isArray(emp.experiences) && emp.experiences.some(exp => exp.lineOfWork === lineOfWork)
@@ -606,7 +604,6 @@ const getAllEmployeesPublic = async (req, res, next) => {
   }
 };
 
-// Get unique filter values for employees
 const getEmployeeFilterOptions = async (req, res, next) => {
   try {
     const [locations, governoratesDb, jobTitlesDb, genders, carOwnerships, specializations] = await Promise.all([
@@ -617,7 +614,6 @@ const getEmployeeFilterOptions = async (req, res, next) => {
       prisma.employee.findMany({ distinct: ['carOwnership'], select: { carOwnership: true }, where: { carOwnership: { not: null } } }),
       prisma.employee.findMany({ distinct: ['specialization'], select: { specialization: true }, where: { specialization: { not: null } } }),
     ]);
-    // For lineOfWork, collect all unique values from experiences arrays
     const employees = await prisma.employee.findMany({ select: { experiences: true } });
     const lineOfWorkSet = new Set();
     employees.forEach(emp => {
@@ -627,10 +623,8 @@ const getEmployeeFilterOptions = async (req, res, next) => {
         });
       }
     });
-    // Always include both 'YES' and 'NO' for carOwnership
     const carOwnershipOptions = Array.from(new Set([...carOwnerships.map(c => c.carOwnership).filter(Boolean), 'YES', 'NO']));
 
-    // استخدم جميع القيم من الـ enum وليس فقط من قاعدة البيانات
     const allGovernorates = typeof Governorate === 'object' && Governorate !== null ? Object.values(Governorate) : [];
     const allJobTitles = typeof JobTitle === 'object' && JobTitle !== null ? Object.values(JobTitle) : [];
     const allLineOfWork = typeof LineOfWork === 'object' && LineOfWork !== null ? Object.values(LineOfWork) : [];
@@ -649,7 +643,6 @@ const getEmployeeFilterOptions = async (req, res, next) => {
   }
 };
 
-// Get a single employee by ID (public/company view)
 const getEmployeeById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -672,25 +665,21 @@ const getEmployeeById = async (req, res, next) => {
 
 const getEmployeeStats = async (req, res, next) => {
   try {
-    // حسب المحافظة
     const governorateCounts = await prisma.employee.groupBy({
       by: ['governorate'],
       _count: { governorate: true },
       where: { governorate: { not: null } },
     });
-    // حسب التخصص
     const specializationCounts = await prisma.employee.groupBy({
       by: ['specialization'],
       _count: { specialization: true },
       where: { specialization: { not: null } },
     });
-    // حسب المسمى الوظيفي
     const jobTitleCounts = await prisma.employee.groupBy({
       by: ['jobTitle'],
       _count: { jobTitle: true },
       where: { jobTitle: { not: null } },
     });
-    // العدد الكلي
     const totalEmployees = await prisma.employee.count();
     res.json({
       governorate: governorateCounts.map(g => ({ name: g.governorate, value: g._count.governorate })),
