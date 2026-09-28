@@ -2,7 +2,6 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  // إنشاء شركة تجريبية أولاً
   const company = await prisma.company.create({
     data: {
       email: 'test@company.com',
@@ -19,7 +18,6 @@ async function main() {
 
   console.log('Company created:', company.companyName);
 
-  // إنشاء وظائف تجريبية
   const jobs = [
     {
       companyId: company.id,
