@@ -1,7 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// جلب كل الوظائف
 exports.getAllJobs = async (req, res, next) => {
   try {
     const jobs = await prisma.job.findMany({
@@ -13,7 +12,6 @@ exports.getAllJobs = async (req, res, next) => {
   }
 };
 
-// جلب تفاصيل وظيفة واحدة
 exports.getJobById = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
@@ -28,7 +26,6 @@ exports.getJobById = async (req, res, next) => {
   }
 };
 
-// حذف وظيفة
 exports.deleteJob = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
