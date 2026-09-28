@@ -1,4 +1,3 @@
-// middleware/validation.js
 const { body, validationResult } = require('express-validator');
 
 const validate = (req, res, next) => {
@@ -13,9 +12,7 @@ const validate = (req, res, next) => {
   next();
 };
 
-/**
- * Validation rules for employee registration
- */
+
 const validateRegistration = [
   body('username')
     .notEmpty()
@@ -34,9 +31,7 @@ const validateRegistration = [
   validate
 ];
 
-/**
- * Validation rules for employee login
- */
+
 const validateLogin = [
   body('email')
     .isEmail()
@@ -48,9 +43,7 @@ const validateLogin = [
   validate
 ];
 
-/**
- * Validation rules for profile updates
- */
+
 const validateProfileUpdate = [
   body('username')
     .optional()
@@ -79,9 +72,7 @@ const validateProfileUpdate = [
   validate
 ];
 
-/**
- * Validation rules for employee experience
- */
+
 const validateExperience = [
   body('company')
     .optional()
@@ -128,9 +119,7 @@ const validateExperience = [
   }
 ];
 
-/**
- * Validation rules for employee education
- */
+
 const validateEducation = [
   body('institution')
     .optional()
@@ -164,9 +153,7 @@ const validateEducation = [
   }
 ];
 
-/**
- * Validation rules for password change
- */
+
 const validatePasswordChange = [
   body('currentPassword')
     .notEmpty()
@@ -186,7 +173,6 @@ const validatePasswordChange = [
       return true;
     }),
 
-  // Middleware to handle validation errors
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
