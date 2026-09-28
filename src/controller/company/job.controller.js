@@ -1,7 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// إضافة وظيفة جديدة من قبل الشركة
 exports.createJob = async (req, res) => {
   try {
     console.log('Job create body:', req.body);
@@ -40,7 +39,6 @@ exports.createJob = async (req, res) => {
       },
     });
 
-    // البحث عن الموظفين المتشابهين بناءً على الحقول الجديدة
     const employees = await prisma.employee.findMany();
     for (const employee of employees) {
       let matchCount = 0;
@@ -77,7 +75,6 @@ exports.createJob = async (req, res) => {
   }
 };
 
-// جلب جميع الوظائف الخاصة بالشركة
 exports.getJobs = async (req, res) => {
   try {
     const companyId = req.user.companyId;
@@ -95,7 +92,6 @@ exports.getJobs = async (req, res) => {
   }
 };
 
-// جلب وظيفة واحدة بالتفصيل
 exports.getJobById = async (req, res) => {
   try {
     const companyId = req.user.companyId;
@@ -110,7 +106,6 @@ exports.getJobById = async (req, res) => {
   }
 };
 
-// تحديث وظيفة
 exports.updateJob = async (req, res) => {
   try {
     const companyId = req.user.companyId;
@@ -126,7 +121,6 @@ exports.updateJob = async (req, res) => {
   }
 };
 
-// حذف وظيفة
 exports.deleteJob = async (req, res) => {
   try {
     const companyId = req.user.companyId;
