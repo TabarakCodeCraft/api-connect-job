@@ -43,13 +43,10 @@ exports.getAllEmployees = async (req, res, next) => {
   }
 };
 
-// دالة حذف موظف
 exports.deleteEmployee = async (req, res, next) => {
   try {
     const userId = parseInt(req.params.id);
-    // حذف من جدول Employee أولاً (لأن فيه علاقة مع User)
     await prisma.employee.deleteMany({ where: { userId } });
-    // حذف من جدول User
     await prisma.user.delete({ where: { id: userId } });
     res.status(200).json({ success: true, message: 'Employee deleted successfully' });
   } catch (error) {
