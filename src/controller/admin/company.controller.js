@@ -63,11 +63,9 @@ exports.generateSecretCode = async (req, res, next) => {
   const companyId = parseInt(req.params.id);
   if (!companyId) return res.status(400).json({ success: false, message: 'Invalid company ID' });
   try {
-    // تحقق من وجود الشركة
     const company = await prisma.company.findUnique({ where: { id: companyId } });
     if (!company) return res.status(404).json({ success: false, message: 'Company not found' });
 
-    // توليد كود فريد
     let code;
     let isUnique = false;
     while (!isUnique) {
@@ -76,13 +74,12 @@ exports.generateSecretCode = async (req, res, next) => {
       if (!existing) isUnique = true;
     }
 
-    // حفظ الكود الجديد
     const secretCode = await prisma.secretCode.create({
       data: {
         code,
         companyId: company.id,
         createdById: req.user?.id || 1,
-        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // سنة
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), 
       }
     });
 
