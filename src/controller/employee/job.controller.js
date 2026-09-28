@@ -1,36 +1,28 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// حساب نسبة التشابه بين الموظف والوظيفة
 function calculateMatch(employee, job) {
   let score = 0;
   let total = 0;
 
-  // المسمى الوظيفي
   total++;
   if (employee.jobTitle && job.jobTitle && employee.jobTitle === job.jobTitle) score++;
 
-  // المحافظة
   total++;
   if (employee.governorate && job.governorate && employee.governorate === job.governorate) score++;
 
-  // التخصص
   total++;
   if (employee.specialization && job.specialization && employee.specialization === job.specialization) score++;
 
-  // مجال العمل
   total++;
   if (employee.lineOfWork && job.lineOfWork && employee.lineOfWork === job.lineOfWork) score++;
 
-  // الجنس
   total++;
   if (!job.gender || (employee.gender && job.gender === employee.gender)) score++;
 
-  // امتلاك سيارة
   total++;
   if (!job.carOwnership || (employee.carOwnership && job.carOwnership === employee.carOwnership)) score++;
 
-  // يمكن إضافة منطق أكثر للمتطلبات لاحقًا
 
   return (score / total) * 100;
 }
@@ -41,7 +33,7 @@ const getMatchedJobs = async (req, res) => {
     
     const employeeId = req.user.employeeId;
     if (!employeeId) {
-      // إذا لم يكن هناك employeeId، نبحث عن الموظف باستخدام userId
+   
       const user = await prisma.user.findUnique({
         where: { id: req.user.userId },
         include: {
@@ -56,7 +48,6 @@ const getMatchedJobs = async (req, res) => {
         });
       }
       
-      // تحديث employeeId
       req.user.employeeId = user.employee.id;
       console.log('Found employee ID from user lookup:', user.employee.id);
     }
@@ -84,7 +75,6 @@ const getMatchedJobs = async (req, res) => {
 
     console.log('Found employee:', employee.fullName);
 
-    // جلب جميع الوظائف النشطة بدلاً من الوظائف المطابقة فقط
     const jobs = await prisma.job.findMany({ 
       where: { isActive: true },
       include: { 
@@ -96,18 +86,16 @@ const getMatchedJobs = async (req, res) => {
           } 
         } 
       },
-      orderBy: { createdAt: 'desc' } // ترتيب حسب الأحدث
+      orderBy: { createdAt: 'desc' }
     });
     
     console.log(`Found ${jobs.length} active jobs`);
     
-    // حساب نسبة التطابق لكل وظيفة ولكن عرض جميع الوظائف
     const allJobs = jobs.map(job => {
       const matchRate = calculateMatch(employee, job);
       return { ...job, matchRate };
     });
 
-    // ترتيب الوظائف حسب نسبة التطابق (الأعلى أولاً) ثم حسب التاريخ
     const sortedJobs = allJobs.sort((a, b) => {
       if (b.matchRate !== a.matchRate) {
         return b.matchRate - a.matchRate;
