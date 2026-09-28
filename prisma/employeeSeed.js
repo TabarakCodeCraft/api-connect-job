@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  // إنشاء مستخدم تجريبي
   const hashedPassword = await bcrypt.hash('test123', 10);
   
   const user = await prisma.user.create({
@@ -18,7 +17,6 @@ async function main() {
 
   console.log('User created:', user.email);
 
-  // إنشاء ملف موظف تجريبي
   const employee = await prisma.employee.create({
     data: {
       userId: user.id,
